@@ -1,0 +1,7 @@
+[
+  { "id": "architecture-1", "category": "architecture", "task": "Explain the major module boundaries and cite the defining files." },
+  { "id": "flow-1", "category": "multi-module-flow", "task": "Trace one request from entry point to persistence and cite each transition." },
+  { "id": "comparison-1", "category": "comparison", "task": "Compare two implementations of the same responsibility and identify behavioral differences." },
+  { "id": "regression-1", "category": "defect-analysis", "task": "Find the cause of a supplied failing test without changing files." },
+  { "id": "implementation-1", "category": "bounded-write", "task": "Implement one specified change and run its focused verification." }
+]
