@@ -16,3 +16,17 @@ it("returns usage error without a task", async () => {
   expect(await main(["analyze"], { stdout, stderr })).toBe(2);
   expect(stderr).toHaveBeenCalledWith(expect.stringContaining("--task is required"));
 });
+
+it("returns a usage error for unknown options without throwing", async () => {
+  const stdout = vi.fn();
+  const stderr = vi.fn();
+  expect(await main(["analyze", "--wat"], { stdout, stderr })).toBe(2);
+  expect(stderr).toHaveBeenCalledWith(expect.stringContaining("Unknown option"));
+});
+
+it("returns a usage error for a malformed timeout", async () => {
+  const stdout = vi.fn();
+  const stderr = vi.fn();
+  expect(await main(["analyze", "--task", "read", "--timeout", "nope"], { stdout, stderr })).toBe(2);
+  expect(stderr).toHaveBeenCalledWith(expect.stringContaining("positive integer"));
+});

@@ -4,7 +4,7 @@ import { expect, it } from "vitest";
 it("publishes only the built CLI and public documents", async () => {
   const pkg = JSON.parse(await readFile("package.json", "utf8"));
   expect(pkg.bin).toEqual({ "cursor-coworker": "dist/src/cli.js" });
-  expect(pkg.files).toEqual(["dist/src", "README.md", "LICENSE"]);
+  expect(pkg.files).toEqual(["dist/src", "dist/bench", "docs/benchmark.md", "README.md", "LICENSE"]);
   expect(pkg.repository?.url).toContain("cursor-coworker");
 });
 

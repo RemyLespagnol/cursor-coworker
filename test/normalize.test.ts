@@ -17,7 +17,20 @@ it("normalizes a successful terminal event", () => {
   });
 });
 
-it("refuses to normalize a non-zero or terminal-less execution", () => {
-  expect(() => normalizeResult({ mode: "analyze", requestedModel: "auto", exitCode: 1, stderr: "denied" }))
-    .toThrow("Cursor failed with exit code 1: denied");
+it("normalizes a non-zero execution as a stable failure envelope", () => {
+  expect(normalizeResult({ mode: "analyze", requestedModel: "auto", exitCode: 1, stderr: "denied" }))
+    .toMatchObject({ status: { technical: "failed", task: "failed" }, summary: "denied", execution: { exitCode: 1 } });
+});
+
+it("rejects invalid evidence entries and invalid durations with warnings", () => {
+  const result = normalizeResult({
+    mode: "analyze", requestedModel: "auto", exitCode: 0, stderr: "",
+    terminal: { type: "result", subtype: "success", duration_ms: "nope", result: 'ok\nEVIDENCE_JSON:[{"kind":"nope","value":"x"},{"kind":"file","value":"x","detail":3}]' }
+  });
+  expect(result.evidence).toEqual([]);
+  expect(result.execution.durationMs).toBe(0);
+  expect(result.warnings).toEqual(expect.arrayContaining([
+    "Cursor result contained invalid evidence entries",
+    "Cursor result contained an invalid duration"
+  ]));
 });

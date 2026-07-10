@@ -20,6 +20,8 @@ export interface ProcessResult {
 }
 
 export function runProcess(request: ProcessRequest): Promise<ProcessResult> {
+  if (request.signal?.aborted) return Promise.reject(new Error("Cursor execution interrupted"));
+
   return new Promise((resolve, reject) => {
     const child = spawn(request.executable, request.args, {
       shell: false,
@@ -30,22 +32,33 @@ export function runProcess(request: ProcessRequest): Promise<ProcessResult> {
     let stderr = "";
     let buffer = "";
     let settled = false;
+    let stopReason: Error | undefined;
+    let forceTimer: NodeJS.Timeout | undefined;
     let transcript: WriteStream | undefined;
     if (request.transcriptPath) transcript = createWriteStream(request.transcriptPath, { mode: 0o600 });
 
-    const stop = (message: string) => {
+    const cleanup = () => {
+      clearTimeout(timer);
+      if (forceTimer) clearTimeout(forceTimer);
+      request.signal?.removeEventListener("abort", onAbort);
+    };
+    const settle = (action: () => void) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
-      child.kill("SIGTERM");
-      const force = setTimeout(() => child.kill("SIGKILL"), 1000);
-      force.unref();
-      transcript?.end();
-      reject(new Error(message));
+      cleanup();
+      if (transcript) transcript.end(action);
+      else action();
     };
-
+    const stop = (message: string) => {
+      if (stopReason || settled) return;
+      stopReason = new Error(message);
+      child.kill("SIGTERM");
+      forceTimer = setTimeout(() => child.kill("SIGKILL"), 1000);
+      forceTimer.unref();
+    };
+    const onAbort = () => stop("Cursor execution interrupted");
     const timer = setTimeout(() => stop(`Cursor execution timed out after ${request.timeoutMs}ms`), request.timeoutMs);
-    request.signal?.addEventListener("abort", () => stop("Cursor execution interrupted"), { once: true });
+    request.signal?.addEventListener("abort", onAbort, { once: true });
 
     child.stdout.on("data", chunk => {
       const text = chunk.toString();
@@ -59,20 +72,17 @@ export function runProcess(request: ProcessRequest): Promise<ProcessResult> {
         catch { stop("Cursor emitted invalid NDJSON"); return; }
       }
     });
-
     child.stderr.on("data", chunk => { stderr += chunk.toString(); });
-    child.once("error", reject);
+    child.once("error", error => settle(() => reject(error)));
     child.once("close", exitCode => {
       if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      transcript?.end();
+      if (stopReason) { settle(() => reject(stopReason)); return; }
       if (buffer.trim()) {
         try { events.push(JSON.parse(buffer) as CursorEvent); }
-        catch { return reject(new Error("Cursor emitted invalid NDJSON")); }
+        catch { settle(() => reject(new Error("Cursor emitted invalid NDJSON"))); return; }
       }
       const terminal = [...events].reverse().find(event => event.type === "result");
-      resolve({ exitCode, stderr, events, ...(terminal ? { terminal } : {}) });
+      settle(() => resolve({ exitCode, stderr, events, ...(terminal ? { terminal } : {}) }));
     });
   });
 }

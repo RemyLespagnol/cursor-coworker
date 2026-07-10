@@ -18,7 +18,8 @@ export async function main(argv = process.argv.slice(2), io: Io = defaultIo): Pr
     io.stdout(`${generateInstructions(target)}\n`);
     return 0;
   }
-  const parsed = parseArgs({
+  try {
+    const parsed = parseArgs({
     args: rest,
     options: {
       task: { type: "string" }, cwd: { type: "string" }, model: { type: "string" },
@@ -28,7 +29,7 @@ export async function main(argv = process.argv.slice(2), io: Io = defaultIo): Pr
     },
     strict: true
   });
-  const cli = {
+    const cli = {
     ...(parsed.values.cwd ? { cwd: parsed.values.cwd } : {}),
     ...(parsed.values.model ? { model: parsed.values.model } : {}),
     ...(parsed.values.timeout ? { timeoutMs: Number(parsed.values.timeout) } : {}),
@@ -36,7 +37,6 @@ export async function main(argv = process.argv.slice(2), io: Io = defaultIo): Pr
     ...(parsed.values["retain-transcript"] ? { retainTranscript: true } : {}),
     ...(parsed.values["cursor-path"] ? { cursorExecutable: parsed.values["cursor-path"] } : {})
   };
-  try {
     if (command === "doctor") {
       const report = await runDoctor(resolveConfig(cli));
       io.stdout(`${JSON.stringify(report)}\n`);
@@ -45,13 +45,17 @@ export async function main(argv = process.argv.slice(2), io: Io = defaultIo): Pr
     if (command !== "analyze" && command !== "run") { io.stderr("command must be analyze, run, doctor, or instructions\n"); return 2; }
     if (!parsed.values.task) { io.stderr("--task is required\n"); return 2; }
     const controller = new AbortController();
-    process.once("SIGINT", () => controller.abort());
-    const result = await delegate({ mode: command, task: parsed.values.task, cli, signal: controller.signal });
-    io.stdout(`${JSON.stringify(result)}\n`);
-    return 0;
+    const onInterrupt = () => controller.abort();
+    process.once("SIGINT", onInterrupt);
+    try {
+      const result = await delegate({ mode: command, task: parsed.values.task, cli, signal: controller.signal });
+      io.stdout(`${JSON.stringify(result)}\n`);
+      return result.status.technical === "interrupted" ? 130 : result.status.technical === "failed" ? 1 : 0;
+    } finally { process.removeListener("SIGINT", onInterrupt); }
   } catch (error) {
-    io.stderr(`${error instanceof Error ? error.message : String(error)}\n`);
-    return 1;
+    const message = error instanceof Error ? error.message : String(error);
+    io.stderr(`${message}\n`);
+    return error instanceof TypeError || message.includes("must be a positive integer") || message.includes("boolean environment value") ? 2 : 1;
   }
 }
 

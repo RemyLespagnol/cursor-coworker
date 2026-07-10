@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { resolve } from "node:path";
 import { resolveConfig } from "../src/config.js";
 
 describe("resolveConfig", () => {
   it("uses safe defaults", () => {
     expect(resolveConfig({}, {}, "/repo")).toMatchObject({
-      cwd: "/repo",
+      cwd: resolve("/repo"),
       model: "auto",
       sandbox: true,
       retainTranscript: false,
