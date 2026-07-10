@@ -1,0 +1,21 @@
+{
+  "name": "cursor-coworker",
+  "version": "0.0.0",
+  "description": "Delegate bounded coding work to an authenticated Cursor Agent CLI",
+  "type": "module",
+  "bin": { "cursor-coworker": "dist/cli.js" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run build && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  },
+  "license": "MIT"
+}
