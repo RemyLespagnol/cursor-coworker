@@ -49,6 +49,38 @@ export interface CursorUsageAttribution {
   entries: CursorUsageEntry[];
 }
 
+export interface ProviderSummary {
+  provider: string;
+  runs: number;
+  technicalSuccesses: number;
+  taskSuccesses: number;
+  scoredRuns: number;
+  scoreCoverage: number;
+  overallScore?: number;
+  factualScore?: number;
+  evidenceScore?: number;
+  usableRuns: number;
+  usableRate?: number;
+  criticalErrors: number;
+  medianLatencyMs: number;
+  minLatencyMs: number;
+  maxLatencyMs: number;
+  usageObservedRuns: number;
+  usageCoverage: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+  estimatedUsageValueUsd?: number;
+  additionalBilledCostUsd?: number;
+}
+
+export interface BenchmarkComparison {
+  schemaVersion: 1;
+  generatedAt: string;
+  providers: ProviderSummary[];
+  limitations: string[];
+}
+
 export function runKey(identity: RunIdentity): RunKey {
   return `${identity.provider}/${identity.caseId}/${identity.repetition}`;
 }
