@@ -116,24 +116,24 @@ export function attributeCursorUsage(
   for (const required of REQUIRED_HEADERS) {
     if (!index.has(required)) throw new Error(`Cursor CSV is missing required column: ${required}`);
   }
-  const col = (name: string): number => index.get(name)!;
+  const cell = (row: string[], name: string): string => row[index.get(name)!] ?? "";
 
   const events: CursorEvent[] = [];
   for (const row of rows) {
     if (row.length !== header.length) throw new Error("Cursor CSV row has the wrong number of columns");
-    const date = Date.parse(row[col("Date")]);
+    const date = Date.parse(cell(row, "Date"));
     if (Number.isNaN(date) || date < start || date >= end) continue;
-    const agentId = row[col("Cloud Agent ID")];
+    const agentId = cell(row, "Cloud Agent ID");
     if (excluded.has(agentId)) continue;
-    const model = normalizeModel(row[col("Model")]);
+    const model = normalizeModel(cell(row, "Model"));
     if (!expectedModels.has(model)) continue;
     events.push({
       date, model, agentId,
-      inputNoCacheWrite: integer(row[col("Input (w/o Cache Write)")], "Input (w/o Cache Write)"),
-      cacheRead: integer(row[col("Cache Read")], "Cache Read"),
-      output: integer(row[col("Output Tokens")], "Output Tokens"),
-      total: integer(row[col("Total Tokens")], "Total Tokens"),
-      cost: row[col("Cost")]
+      inputNoCacheWrite: integer(cell(row, "Input (w/o Cache Write)"), "Input (w/o Cache Write)"),
+      cacheRead: integer(cell(row, "Cache Read"), "Cache Read"),
+      output: integer(cell(row, "Output Tokens"), "Output Tokens"),
+      total: integer(cell(row, "Total Tokens"), "Total Tokens"),
+      cost: cell(row, "Cost")
     });
   }
 
@@ -142,12 +142,12 @@ export function attributeCursorUsage(
     throw new Error(`Cursor event count ${events.length} does not match Cursor run count ${cursorRuns.length}`);
   }
   cursorRuns.forEach((run, i) => {
-    if (normalizeModel(run.model) !== events[i].model) {
-      throw new Error(`Cursor event model ${events[i].model} does not match run model ${run.model} at position ${i + 1}`);
+    if (normalizeModel(run.model) !== events[i]!.model) {
+      throw new Error(`Cursor event model ${events[i]!.model} does not match run model ${run.model} at position ${i + 1}`);
     }
   });
 
-  return { entries: cursorRuns.map((run, i) => ({ key: run.key, usage: eventUsage(events[i]) })) };
+  return { entries: cursorRuns.map((run, i) => ({ key: run.key, usage: eventUsage(events[i]!) })) };
 }
 
 export function applyCursorUsage(runs: LoadedBenchmarkRun[], attribution: CursorUsageAttribution): LoadedBenchmarkRun[] {

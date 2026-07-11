@@ -34,8 +34,8 @@ function optionalNonNegative(value: unknown, field: string): number | undefined 
   return value;
 }
 
-function omitUndefined<T extends Record<string, unknown>>(value: T): T {
-  return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T;
+function omitUndefined<T extends Record<string, unknown>>(value: T): Partial<T> {
+  return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as Partial<T>;
 }
 
 function normalizeUsage(provider: string, usageState: string, raw: Record<string, unknown>): ObservedUsage {
@@ -51,7 +51,7 @@ function normalizeUsage(provider: string, usageState: string, raw: Record<string
     estimatedUsageValueUsd: optionalNonNegative(usage.costUsd, "costUsd"),
     billingState: "unknown" as const,
     source: "claude-result" as const
-  });
+  }) as ObservedUsage;
 }
 
 function extractSessionId(provider: string, raw: Record<string, unknown>): string | undefined {

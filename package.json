@@ -16,7 +16,9 @@
     "check": "npm run build && npm test",
     "prebenchmark:run": "npm run build",
     "benchmark:run": "node dist/bench/run.js",
-    "benchmark:validate": "node dist/bench/score.js"
+    "benchmark:validate": "node dist/bench/score.js",
+    "prebenchmark:report": "npm run build",
+    "benchmark:report": "node dist/bench/report.js"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
