@@ -5,6 +5,8 @@ import { execFileSync } from "node:child_process";
 import { describe, expect, test } from "vitest";
 import { runClaudeInvocation } from "../bench/claude.js";
 
+const isWindows = process.platform === "win32";
+
 function repository(): { path: string; commit: string } {
   const path = mkdtempSync(join(tmpdir(), "claude-bench-repo-"));
   execFileSync("git", ["init", "-q", path]);
@@ -39,7 +41,9 @@ process.exitCode = ${exitCode};
   return path;
 }
 
-describe("Claude benchmark invocation", () => {
+// The benchmark harness spawns `claude` via execFile; Node refuses to spawn a
+// script-based fake CLI on Windows without a shell, and the real CLI is POSIX-only here.
+describe.skipIf(isWindows)("Claude benchmark invocation", () => {
   test("runs Sonnet read-only in a disposable clone and records observed usage", async () => {
     const repo = repository();
     const log = join(mkdtempSync(join(tmpdir(), "claude-bench-log-")), "call.json");
