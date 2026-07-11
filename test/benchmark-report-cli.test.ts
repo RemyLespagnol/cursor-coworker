@@ -139,3 +139,25 @@ describe("benchmark:report CLI", () => {
     expect(result.stderr).toMatch(/cursor-csv/i);
   });
 });
+
+describe("reporting documentation", () => {
+  const readme = readFileSync(join(root, "README.md"), "utf8");
+  const doc = readFileSync(join(root, "docs/benchmark.md"), "utf8");
+
+  it("documents the command in the README and the benchmark doc", () => {
+    for (const source of [readme, doc]) {
+      for (const token of ["benchmark:report", "--results", "--scores"]) {
+        expect(source).toContain(token);
+      }
+    }
+  });
+
+  it("documents the Cursor and cost options in the benchmark doc", () => {
+    for (const token of [
+      "--cursor-csv", "--cursor-start", "--cursor-end", "--cursor-exclude-id",
+      "estimatedUsageValueUsd", "additionalBilledCostUsd"
+    ]) {
+      expect(doc).toContain(token);
+    }
+  });
+});
