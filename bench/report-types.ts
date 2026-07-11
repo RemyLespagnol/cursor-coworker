@@ -40,6 +40,15 @@ export interface BlindScore extends RunIdentity {
   criticalError: boolean;
 }
 
+export interface CursorUsageEntry {
+  key: RunKey;
+  usage: ObservedUsage;
+}
+
+export interface CursorUsageAttribution {
+  entries: CursorUsageEntry[];
+}
+
 export function runKey(identity: RunIdentity): RunKey {
   return `${identity.provider}/${identity.caseId}/${identity.repetition}`;
 }
