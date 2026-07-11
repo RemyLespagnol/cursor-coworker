@@ -1,0 +1,22 @@
+[
+  {
+    "id": "architecture",
+    "category": "architecture",
+    "task": "Describe the major architectural module boundaries of this repository. Explain each module's responsibility and cite the defining production files and entry points. Do not modify files."
+  },
+  {
+    "id": "request-flow",
+    "category": "multi-module-flow",
+    "task": "Trace one representative request or operation from its public entry point through the main business logic to its external I/O boundary. Cite every transition with production files and key symbols. Do not modify files."
+  },
+  {
+    "id": "implementation-comparison",
+    "category": "comparison",
+    "task": "Identify two production implementations of the same responsibility. Compare their inputs, control flow, outputs, error handling, and meaningful behavioral differences with file and symbol evidence. Do not modify files."
+  },
+  {
+    "id": "risk-analysis",
+    "category": "defect-analysis",
+    "task": "Identify one high-risk production flow that crosses multiple modules. Explain the most plausible regression points, the existing test coverage, and the specific evidence supporting each conclusion. Do not modify files."
+  }
+]
