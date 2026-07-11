@@ -1,0 +1,20 @@
+{
+  "provider": "claude-sonnet",
+  "status": "completed",
+  "taskStatus": "completed",
+  "summary": "Reviewed the architecture of the fixture module.",
+  "evidence": [
+    { "kind": "file", "value": "src/example.ts", "detail": "entry point" }
+  ],
+  "durationMs": 2000,
+  "sessionId": "fixture-claude-session",
+  "workspaceChanged": false,
+  "usage": {
+    "state": "observed",
+    "inputTokens": 100,
+    "outputTokens": 20,
+    "totalTokens": 120,
+    "costUsd": 0.25
+  },
+  "warnings": []
+}

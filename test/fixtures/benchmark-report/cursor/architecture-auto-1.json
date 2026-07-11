@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "status": { "technical": "completed", "task": "completed" },
+  "summary": "Reviewed the architecture of the fixture module.",
+  "evidence": [
+    { "kind": "file", "value": "src/example.ts", "detail": "entry point" }
+  ],
+  "changes": { "available": false },
+  "execution": {
+    "mode": "analyze",
+    "requestedModel": "auto",
+    "durationMs": 1000,
+    "exitCode": 0,
+    "sessionId": "fixture-cursor-session"
+  },
+  "usage": { "state": "unknown" },
+  "warnings": []
+}
