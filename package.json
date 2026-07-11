@@ -10,10 +10,12 @@
   "bugs": { "url": "https://github.com/RemyLespagnol/cursor-coworker/issues" },
   "homepage": "https://github.com/RemyLespagnol/cursor-coworker#readme",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node -e \"require('node:fs').copyFileSync('bench/cases.readonly.json','dist/bench/cases.readonly.json')\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run build && npm test",
+    "prebenchmark:run": "npm run build",
+    "benchmark:run": "node dist/bench/run.js",
     "benchmark:validate": "node dist/bench/score.js"
   },
   "devDependencies": {

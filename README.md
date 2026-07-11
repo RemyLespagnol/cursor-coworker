@@ -61,6 +61,37 @@ npm run check
 
 Standard tests use a fake executable and make no billable Cursor calls.
 
+## Experimental benchmark
+
+The repository includes a local, sequential, read-only harness for comparing Cursor Auto, Cursor Composer 2.5, Claude Sonnet, and Claude Sonnet with native subagents. It requires a clean Git target and writes results under `.benchmark-results/` in the caller's current directory by default; `--output` can select another location.
+
+```bash
+# Cursor Auto and Composer 2.5
+npm run benchmark:run -- --repo /path/to/repository
+
+# Claude Sonnet, with and without subagents
+npm run benchmark:run -- \
+  --repo /path/to/repository \
+  --providers claude-sonnet,claude-sonnet-subagents
+```
+
+Claude receives only read-only tools inside a fresh disposable clone. The subagent variant additionally receives the built-in `Agent` tool. See [docs/benchmark.md](docs/benchmark.md) for the protocol, options, safety constraints, and interpretation guidance.
+
+### Initial results
+
+An initial experiment used four generic repository-analysis cases with three repetitions on one private TypeScript service. Scores combine factual quality and evidence quality on a 0–5 rubric. The review was consistent but not independently blinded, so treat these numbers as directional rather than universal.
+
+| Path | Quality | Median latency | Estimated usage value |
+|---|---:|---:|---:|
+| Cursor Auto | **4.83 / 5** | **68.6 s** | $2.13 |
+| Cursor Composer 2.5 | 4.54 / 5 | 72.4 s | **$1.18** |
+| Claude Sonnet | 3.83 / 5 | 101.9 s | $9.03 |
+| Claude Sonnet + subagents | 4.08 / 5 | 69.8 s | $14.27 |
+
+Cursor costs are reconstructed from the exported token events and Cursor's published per-million-token rates. Those events were marked `Included`, so their additional invoice cost was zero. Claude values come from Claude Code's `total_cost_usd` field and may likewise represent subscription usage rather than an additional charge. Claude subagent token counts were incomplete even when aggregate cost was present. The private repository, raw responses, and usage exports are intentionally not published.
+
+The initial Claude experiment used unrestricted permissions inside disposable clones. Review showed that a clone is not an OS security boundary, so the published harness now uses the stricter read-only tool policy described above.
+
 ## License
 
 MIT
