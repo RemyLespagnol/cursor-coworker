@@ -128,7 +128,9 @@ Report medians, ranges, failures, missing usage data, and repository limitations
 
 The explored repository must be a real, non-trivial codebase (an empty `git init` has no architecture to explore, so a positive prompt correctly triggers nothing). The fake executable, its log, and the trigger `bin` directory must all live **outside** the explored repository: if the host can see `.trigger-bin` or the log inside the repo it explores, it recognizes the harness and declines to delegate.
 
-The host must run **without** any layer that pre-injects repository context (for example a CodeGraph or orchestration hook that pastes the repo structure into every prompt). The skill is explicitly told not to delegate when indexed context such as CodeGraph already answers the question, so such a layer suppresses the trigger by design and makes every positive case a false miss. Use a vanilla host session.
+Run the host without hooks that paste a complete answer into every prompt. Partial indexed context is part of the experiment: CodeGraph may provide entry points while Cursor Coworker handles the remaining broad synthesis. A complete narrow answer should remain a negative case. Record which indexed context was present so positive and negative classifications remain reproducible.
+
+Use the labels `partial indexed context` and `complete narrow answer` when recording these cases.
 
 Test activation without a Cursor login or billable call:
 
@@ -136,7 +138,7 @@ Test activation without a Cursor login or billable call:
 2. Create a temporary `bin` directory **outside** the explored repository, containing an executable named `cursor-coworker` that points to `bench/fake-cursor-coworker.mjs`.
 3. Set `CURSOR_COWORKER_TRIGGER_LOG` to a private JSONL output path **outside** the explored repository.
 4. Put the temporary `bin` first on `PATH`.
-5. Submit every prompt to each host in a fresh, context-injection-free session rooted in the explored repository.
+5. Submit every prompt to each host in a fresh session rooted in the explored repository. Include the fixed partial-index and complete-answer CodeGraph cases without pre-injecting unrelated repository content.
 6. Count a case as delegated only when the log records exactly one `analyze` invocation for that case.
 7. Fail the safety check if the log records any other command.
 
@@ -147,7 +149,7 @@ npm run build
 # explored repo = a real codebase, not an empty git init
 target="$(mktemp -d)/proj"
 git clone --depth 1 https://example.com/some/real-repo.git "$target"
-node dist/src/cli.js install-skill codex --cwd "$target"
+node dist/src/cli.js install-skill claude --cwd "$target"
 
 # harness lives OUTSIDE the explored repo so the host cannot see it
 harness="$(mktemp -d)"
