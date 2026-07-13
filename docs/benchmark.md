@@ -126,13 +126,17 @@ Report medians, ranges, failures, missing usage data, and repository limitations
 
 `bench/cases.skill-trigger.json` contains ten prompts that should delegate and ten prompts that should remain local. This experiment invokes real Codex or Claude Code, so it is opt-in and excluded from `npm run check`.
 
+The explored repository must be a real, non-trivial codebase (an empty `git init` has no architecture to explore, so a positive prompt correctly triggers nothing). The fake executable, its log, and the trigger `bin` directory must all live **outside** the explored repository: if the host can see `.trigger-bin` or the log inside the repo it explores, it recognizes the harness and declines to delegate.
+
+The host must run **without** any layer that pre-injects repository context (for example a CodeGraph or orchestration hook that pastes the repo structure into every prompt). The skill is explicitly told not to delegate when indexed context such as CodeGraph already answers the question, so such a layer suppresses the trigger by design and makes every positive case a false miss. Use a vanilla host session.
+
 Test activation without a Cursor login or billable call:
 
-1. Build the package and install the skill into a disposable Git repository.
-2. Create a temporary `bin` directory containing an executable named `cursor-coworker` that points to `bench/fake-cursor-coworker.mjs`.
-3. Set `CURSOR_COWORKER_TRIGGER_LOG` to a private JSONL output path.
+1. Build the package and install the skill into a disposable clone of a real repository.
+2. Create a temporary `bin` directory **outside** the explored repository, containing an executable named `cursor-coworker` that points to `bench/fake-cursor-coworker.mjs`.
+3. Set `CURSOR_COWORKER_TRIGGER_LOG` to a private JSONL output path **outside** the explored repository.
 4. Put the temporary `bin` first on `PATH`.
-5. Submit every prompt to each host in a fresh session rooted in the disposable repository.
+5. Submit every prompt to each host in a fresh, context-injection-free session rooted in the explored repository.
 6. Count a case as delegated only when the log records exactly one `analyze` invocation for that case.
 7. Fail the safety check if the log records any other command.
 
@@ -140,13 +144,17 @@ Example POSIX setup:
 
 ```bash
 npm run build
-target="$(mktemp -d)"
-git -C "$target" init
+# explored repo = a real codebase, not an empty git init
+target="$(mktemp -d)/proj"
+git clone --depth 1 https://example.com/some/real-repo.git "$target"
 node dist/src/cli.js install-skill codex --cwd "$target"
-mkdir -p "$target/.trigger-bin" "$target/.benchmark-results"
-ln -s "$PWD/bench/fake-cursor-coworker.mjs" "$target/.trigger-bin/cursor-coworker"
-export PATH="$target/.trigger-bin:$PATH"
-export CURSOR_COWORKER_TRIGGER_LOG="$target/.benchmark-results/calls.jsonl"
+
+# harness lives OUTSIDE the explored repo so the host cannot see it
+harness="$(mktemp -d)"
+mkdir -p "$harness/bin"
+ln -s "$PWD/bench/fake-cursor-coworker.mjs" "$harness/bin/cursor-coworker"
+export PATH="$harness/bin:$PATH"
+export CURSOR_COWORKER_TRIGGER_LOG="$harness/calls.jsonl"
 ```
 
 Run the fixed prompts manually or through an independently reviewed host runner. Do not add host invocations to the standard suite. Record host, case ID, whether delegation was expected, whether it occurred, number of calls, command, and latency.
