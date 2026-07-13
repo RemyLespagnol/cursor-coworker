@@ -1,6 +1,24 @@
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, rmSync, symlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { expect, it, vi } from "vitest";
 import { main } from "../src/cli.js";
 import type { SkillInstallResult } from "../src/types.js";
+
+it("runs when the executable is reached through a symlink", () => {
+  const cli = resolve("dist/src/cli.js");
+  const temporary = mkdtempSync(join(tmpdir(), "cursor-coworker-symlink-"));
+  try {
+    const link = join(temporary, "cursor-coworker.js");
+    symlinkSync(cli, link);
+    const result = spawnSync(process.execPath, [link, "instructions", "claude"], { encoding: "utf8" });
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).toContain("cursor-coworker analyze");
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
 
 it("prints generated Claude instructions", async () => {
   const stdout = vi.fn();
