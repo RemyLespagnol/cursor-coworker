@@ -24,6 +24,9 @@ it("documents skill installation and the opt-in trigger experiment", async () =>
   expect(readme).toContain("install-skill codex");
   expect(readme).toContain("install-skill claude");
   expect(readme).toContain("--scope user");
+  expect(readme).toContain("cursor-coworker instructions claude");
+  expect(readme).toContain("existing `CLAUDE.md`");
+  expect(readme).toContain("does not modify");
   expect(benchmark).toContain("cases.skill-trigger.json");
   expect(benchmark).toContain("CURSOR_COWORKER_TRIGGER_LOG");
   expect(benchmark).toContain("80%");
