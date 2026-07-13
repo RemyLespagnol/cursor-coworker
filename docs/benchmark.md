@@ -130,7 +130,7 @@ The explored repository must be a real, non-trivial codebase (an empty `git init
 
 Run the host without hooks that paste a complete answer into every prompt. Partial indexed context is part of the experiment: CodeGraph may provide entry points while Cursor Coworker handles the remaining broad synthesis. A complete narrow answer should remain a negative case. Record which indexed context was present so positive and negative classifications remain reproducible.
 
-Use the labels `partial indexed context` and `complete narrow answer` when recording these cases.
+The fixed indexed cases are self-contained and grounded in the cloned repository: each prompt names the real paths and symbols needed to reproduce its classification in a fresh session. Use the labels `partial indexed context` and `complete narrow answer` when recording these cases.
 
 Test activation without a Cursor login or billable call:
 

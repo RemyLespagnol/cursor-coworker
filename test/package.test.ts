@@ -31,6 +31,8 @@ it("documents skill installation and the opt-in trigger experiment", async () =>
   expect(benchmark).toContain("partial indexed context");
   expect(benchmark).toContain("complete narrow answer");
   expect(benchmark).toContain("install-skill claude");
+  expect(benchmark).toContain("self-contained");
+  expect(benchmark).toContain("grounded in the cloned repository");
   expect(benchmark).not.toContain("Use a vanilla host session");
   expect(benchmark).not.toContain("suppresses the trigger by design");
 });
