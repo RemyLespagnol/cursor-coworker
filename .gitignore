@@ -4,3 +4,5 @@ coverage/
 .benchmark-results/
 .cursor-coworker/
 *.log
+
+tokentelemetry
