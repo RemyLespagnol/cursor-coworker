@@ -28,6 +28,9 @@
 - Modify `test/skill-trigger-fixture.test.ts`: require those semantic fixture categories and classifications.
 - Modify `docs/benchmark.md`: remove the obsolete instruction to avoid CodeGraph-enabled sessions and document the complementary trigger boundary.
 - Modify `test/package.test.ts`: prevent the published benchmark protocol from regressing to unconditional CodeGraph suppression.
+- Modify `src/commands/instructions.ts`: emit the prototype-validated Claude `CLAUDE.md` routing rule while retaining Codex guidance.
+- Modify `test/cli.test.ts`: lock the Claude routing rule and unchanged Codex behavior.
+- Modify `README.md`: explain how to review and add the generated rule without automatic file mutation.
 
 ### Task 1: Encode the complementary activation boundary
 
@@ -332,4 +335,127 @@ Expected:
 ```bash
 rtk git add docs/benchmark.md test/package.test.ts
 rtk git commit -m "docs: align CodeGraph trigger experiment"
+```
+
+### Task 4: Generate the validated Claude memory rule
+
+**Files:**
+- Modify: `test/cli.test.ts`
+- Modify: `src/commands/instructions.ts`
+- Modify: `test/package.test.ts`
+- Modify: `README.md`
+
+**Interfaces:**
+- Consumes: `generateInstructions(target: "claude" | "codex"): string` and the existing `cursor-coworker instructions claude|codex` command.
+- Produces: a Claude-specific block suitable for an existing `CLAUDE.md`, plus unchanged Codex direct-CLI guidance.
+
+- [ ] **Step 1: Write failing Claude routing tests**
+
+Extend `prints generated Claude instructions` in `test/cli.test.ts` so the emitted text must contain:
+
+```ts
+const text = stdout.mock.calls[0]?.[0] ?? "";
+expect(text).toContain("invoke `/cursor-coworker` exactly once");
+expect(text).toContain("two or more modules");
+expect(text).toContain("complete narrow answer already in context");
+expect(text).not.toContain("CodeGraph");
+```
+
+Add a separate Codex regression test:
+
+```ts
+it("keeps generated Codex instructions on the direct CLI flow", async () => {
+  const stdout = vi.fn();
+  const stderr = vi.fn();
+  expect(await main(["instructions", "codex"], { stdout, stderr })).toBe(0);
+  const text = stdout.mock.calls[0]?.[0] ?? "";
+  expect(text).toContain('cursor-coworker analyze --task "<bounded question>"');
+  expect(text).not.toContain("/cursor-coworker");
+  expect(stderr).not.toHaveBeenCalled();
+});
+```
+
+- [ ] **Step 2: Run the focused CLI test and verify RED**
+
+Run:
+
+```bash
+rtk npm test -- test/cli.test.ts
+```
+
+Expected: FAIL because Claude instructions do not yet mention `/cursor-coworker` or define multi-module routing; the new Codex regression remains green.
+
+- [ ] **Step 3: Emit target-specific instructions**
+
+Update `generateInstructions` so the Claude branch starts with the prototype-validated rule:
+
+```markdown
+## Cursor Coworker delegation
+
+For every bounded read-only repository question that requires broad synthesis, you must invoke `/cursor-coworker` exactly once before using direct repository exploration tools. Treat architecture explanation, tracing behavior across two or more modules, comparing components, locating an unknown implementation, and cross-cutting risk analysis as broad synthesis, even when existing repository context provides entry-point files or symbols. Keep a known-file or known-symbol lookup, trivial search, complete narrow answer already in context, editing task, or non-repository question local. Never invoke Cursor Coworker for edits.
+```
+
+Append the existing compact-result, verification, Git, concurrency, and review ownership guidance. Do not mention CodeGraph or another competing product. Keep the Codex branch's current direct `cursor-coworker analyze` and authorized `run` instructions unchanged.
+
+- [ ] **Step 4: Run the focused CLI test and verify GREEN**
+
+Run:
+
+```bash
+rtk npm test -- test/cli.test.ts
+```
+
+Expected: all CLI tests PASS; Claude contains the routing rule and Codex retains direct CLI instructions.
+
+- [ ] **Step 5: Write the failing README contract**
+
+Extend `documents skill installation and the opt-in trigger experiment` in `test/package.test.ts` with:
+
+```ts
+expect(readme).toContain("cursor-coworker instructions claude");
+expect(readme).toContain("existing `CLAUDE.md`");
+expect(readme).toContain("does not modify");
+```
+
+- [ ] **Step 6: Run the package test and verify RED**
+
+Run:
+
+```bash
+rtk npm test -- test/package.test.ts
+```
+
+Expected: FAIL because the README does not yet explain the generated Claude memory rule.
+
+- [ ] **Step 7: Document manual, non-destructive CLAUDE.md integration**
+
+After the host-skill installation commands in `README.md`, add:
+
+````markdown
+For more reliable implicit activation in Claude Code, print the validated routing block and add it to your existing `CLAUDE.md`:
+
+```bash
+cursor-coworker instructions claude
+```
+
+Review and merge the printed block manually. The command only prints instructions; it does not modify or overwrite `CLAUDE.md`.
+````
+
+- [ ] **Step 8: Run focused and full verification**
+
+Run:
+
+```bash
+rtk npm test -- test/cli.test.ts test/package.test.ts test/skill-asset.test.ts test/skill-trigger-fixture.test.ts
+rtk npm run check
+rtk npm run verify:package
+```
+
+Expected: focused tests, all standard tests, build, and package verification PASS without authenticated host calls.
+
+- [ ] **Step 9: Commit the validated Claude routing output**
+
+```bash
+rtk git add src/commands/instructions.ts test/cli.test.ts README.md test/package.test.ts
+rtk git commit -m "feat: generate reliable Claude skill routing"
 ```

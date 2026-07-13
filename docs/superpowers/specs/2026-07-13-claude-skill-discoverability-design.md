@@ -25,6 +25,10 @@ The workflow body will explain the boundary in operational terms: use existing t
 
 The canonical skill asset remains vendor- and tool-agnostic. It will not name CodeGraph or any competing repository tool in its frontmatter or body. Named tools may appear in external trigger fixtures and benchmark documentation as realistic compatibility scenarios, never as dependencies or selection logic.
 
+Claude Code's implicit skill selection is not reliable enough when the skill description is the only routing signal. Keep the skill install unchanged and strengthen the existing `cursor-coworker instructions claude` output with a concise `CLAUDE.md` routing rule. The rule tells Claude to invoke `/cursor-coworker` exactly once before direct exploration for broad read-only synthesis, defines multi-module tracing as broad, and preserves every negative boundary. It does not name CodeGraph or another competing product.
+
+The CLI will print the rule for the user to review and add to an existing `CLAUDE.md`; it will not create, merge, append, or overwrite a memory file automatically. Codex instructions and the skill installer remain unchanged.
+
 ## Resulting selection model
 
 | Question shape | Preferred path |
@@ -90,6 +94,8 @@ Update the trigger fixture corpus with positive cases that explicitly mention Co
 
 No standard test invokes Claude Code, Codex, Cursor, CodeGraph, or an authenticated account.
 
+The deterministic CLI tests also require Claude instructions to contain the validated `/cursor-coworker` routing rule, the multi-module positive boundary, and the complete-answer negative boundary. Codex instructions retain their current direct CLI guidance.
+
 ### Opt-in Claude Code trigger experiment
 
 Run the existing project-installed skill experiment with a recording fake `cursor-coworker` executable on `PATH`. Score at least these categories:
@@ -107,12 +113,17 @@ The existing acceptance thresholds remain unchanged:
 
 An authenticated Cursor experiment remains optional and separate from trigger scoring.
 
+### Disposable Claude instruction prototype
+
+The accepted routing text was tested outside the product in a disposable clone with the installed project skill and a recording fake executable. Through Claude Code account 2, both broad positive cases invoked exactly one `analyze`, both narrow negative cases stayed local, and no `run` call occurred. The positive host processes exceeded the 120-second experiment bound after delegation, so this evidence proves routing rather than end-to-end latency or result usability.
+
 ## Rollout
 
-1. Change only the canonical skill asset and its deterministic activation fixtures/tests.
-2. Run the focused skill tests, then `npm run check`.
-3. Install the built skill into a disposable Claude Code project.
-4. Run the fake-executable Claude Code trigger experiment when the host is locally available.
-5. Compare broad CodeGraph-positive activation with the unchanged narrow-query false-positive rate.
+1. Change the canonical skill asset and its deterministic activation fixtures/tests.
+2. Generate the validated Claude routing block through the existing `instructions claude` command and document manual `CLAUDE.md` integration.
+3. Run the focused skill and instruction tests, then `npm run check`.
+4. Install the built skill into a disposable Claude Code project and add the generated block to its `CLAUDE.md`.
+5. Run the fake-executable Claude Code trigger experiment when the host is locally available.
+6. Compare broad CodeGraph-positive activation with the unchanged narrow-query false-positive rate.
 
 If activation remains below the existing threshold after one description revision, reconsider a distribution plugin or MCP adapter as already allowed by the original read-only skill design. Do not add either in this change.
