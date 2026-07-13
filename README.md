@@ -47,14 +47,30 @@ Both delegation commands accept `--cwd`, `--model`, `--timeout`, `--no-sandbox`,
 
 `auto` is the default. `composer-2.5` is the only initial comparison model. Consult the current Cursor dashboard, plan documentation, and company policy for authoritative usage information.
 
-## Host-agent instructions
+## Host-agent skill
+
+Install the portable read-only skill into the current repository:
+
+```bash
+cursor-coworker install-skill codex
+cursor-coworker install-skill claude
+```
+
+Project scope is the default and writes only the selected host path under the current repository. Use `--scope user` explicitly to install the same skill for every repository:
+
+```bash
+cursor-coworker install-skill codex --scope user
+cursor-coworker install-skill claude --scope user
+```
+
+The skill delegates bounded, context-heavy repository exploration through `analyze`. It never authorizes writes, retries a failed delegation, retains transcripts, or takes ownership of Git and verification. Existing destinations are never overwritten.
+
+The shorter generated guidance remains available through:
 
 ```bash
 cursor-coworker instructions claude
 cursor-coworker instructions codex
 ```
-
-The generated guidance is additive. It does not modify or replace Superpowers or the host's native subagents.
 
 ## Development
 

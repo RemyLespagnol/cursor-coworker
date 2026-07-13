@@ -34,3 +34,14 @@ export interface ResultEnvelope {
   usage: { state: "observed" | "unknown"; inputTokens?: number; outputTokens?: number };
   warnings: string[];
 }
+
+export type SkillHost = "codex" | "claude";
+export type SkillScope = "project" | "user";
+
+export interface SkillInstallResult {
+  schemaVersion: 1;
+  status: "installed";
+  host: SkillHost;
+  scope: SkillScope;
+  path: string;
+}

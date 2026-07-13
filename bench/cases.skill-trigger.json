@@ -1,0 +1,22 @@
+[
+  {"id":"positive-architecture","shouldDelegate":true,"prompt":"Explain the unfamiliar repository architecture and cite the modules that define each major boundary."},
+  {"id":"positive-request-flow","shouldDelegate":true,"prompt":"Trace an incoming API request across routing, validation, business logic, persistence, and response serialization."},
+  {"id":"positive-unknown-implementation","shouldDelegate":true,"prompt":"Locate where idempotency is implemented when no relevant filename or symbol is known, and return evidence."},
+  {"id":"positive-component-comparison","shouldDelegate":true,"prompt":"Compare how the three storage adapters implement retries, timeouts, and error normalization across the repository."},
+  {"id":"positive-risk-surface","shouldDelegate":true,"prompt":"Identify cross-cutting security risks in authentication and authorization, with focused file evidence."},
+  {"id":"positive-event-flow","shouldDelegate":true,"prompt":"Trace how a domain event is produced, transformed, published, consumed, and retried across modules."},
+  {"id":"positive-configuration","shouldDelegate":true,"prompt":"Explain how configuration values flow from environment loading through validation into runtime consumers."},
+  {"id":"positive-feature-ownership","shouldDelegate":true,"prompt":"Find every subsystem involved in the billing reconciliation feature and explain their responsibilities."},
+  {"id":"positive-error-policy","shouldDelegate":true,"prompt":"Map the repository-wide error classification and recovery policy across transport and domain layers."},
+  {"id":"positive-change-surface","shouldDelegate":true,"prompt":"Determine the full change surface for adding a new authentication provider before any implementation begins."},
+  {"id":"negative-known-file","shouldDelegate":false,"prompt":"Read src/config.ts and summarize the resolveConfig function already identified there."},
+  {"id":"negative-known-symbol","shouldDelegate":false,"prompt":"Explain the generateInstructions symbol in src/commands/instructions.ts."},
+  {"id":"negative-trivial-text","shouldDelegate":false,"prompt":"Find the exact string CURSOR_COWORKER_TIMEOUT_MS in the repository."},
+  {"id":"negative-filename","shouldDelegate":false,"prompt":"Check whether the repository contains a file named SECURITY.md."},
+  {"id":"negative-codegraph","shouldDelegate":false,"prompt":"Use the CodeGraph result already provided above to summarize the callers without exploring again."},
+  {"id":"negative-edit","shouldDelegate":false,"prompt":"Modify README.md to add one sentence and then run the documentation tests."},
+  {"id":"negative-test","shouldDelegate":false,"prompt":"Run the existing test/cli.test.ts test file and report whether it passes."},
+  {"id":"negative-nonrepo","shouldDelegate":false,"prompt":"Research the current weather in Paris and summarize the forecast."},
+  {"id":"negative-local-diff","shouldDelegate":false,"prompt":"Summarize the current git diff that is already available in the conversation."},
+  {"id":"negative-retry","shouldDelegate":false,"prompt":"The previous Cursor Coworker delegation failed; retry the same delegation automatically."}
+]
