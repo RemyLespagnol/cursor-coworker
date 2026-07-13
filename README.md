@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="Cursor Coworker logo" width="220">
+</p>
+
 # Cursor Coworker
 
 Delegate bounded repository analysis or implementation to an authenticated Cursor Agent CLI and return a compact machine-readable result.
