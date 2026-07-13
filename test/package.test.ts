@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { expect, it } from "vitest";
+import { assertReleaseTag } from "../scripts/check-release-tag.mjs";
 import { validatePackageManifest } from "../scripts/verify-package.mjs";
 
 it("publishes only the built CLI and public documents", async () => {
@@ -71,4 +72,23 @@ it("verifies and installs the produced package without Cursor authentication", (
     version: "0.1.0",
     skillInstalled: true
   });
+});
+
+it("requires the release tag to exactly match the package version", () => {
+  expect(() => assertReleaseTag("v0.1.0", "0.1.0")).not.toThrow();
+  expect(() => assertReleaseTag("v0.1.1", "0.1.0")).toThrow(
+    "Release tag v0.1.1 does not match package version 0.1.0"
+  );
+});
+
+it("publishes version tags through npm trusted publishing", async () => {
+  const workflow = await readFile(".github/workflows/release.yml", "utf8");
+  expect(workflow).toContain("tags: [\"v*\"]");
+  expect(workflow).toContain("id-token: write");
+  expect(workflow).toContain("node scripts/check-release-tag.mjs");
+  expect(workflow).toContain("npm run check");
+  expect(workflow).toContain("npm run verify:package");
+  expect(workflow).toContain("npm publish --access public --provenance");
+  expect(workflow).not.toContain("NODE_AUTH_TOKEN");
+  expect(workflow).not.toContain("NPM_TOKEN");
 });
