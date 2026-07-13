@@ -121,3 +121,36 @@ Continue only with at least 30% lower primary-agent context, at least 80% direct
 ## Interpretation
 
 Report medians, ranges, failures, missing usage data, and repository limitations. Do not claim cost savings from token prices alone.
+
+## Opt-in Agent Skill trigger experiment
+
+`bench/cases.skill-trigger.json` contains ten prompts that should delegate and ten prompts that should remain local. This experiment invokes real Codex or Claude Code, so it is opt-in and excluded from `npm run check`.
+
+Test activation without a Cursor login or billable call:
+
+1. Build the package and install the skill into a disposable Git repository.
+2. Create a temporary `bin` directory containing an executable named `cursor-coworker` that points to `bench/fake-cursor-coworker.mjs`.
+3. Set `CURSOR_COWORKER_TRIGGER_LOG` to a private JSONL output path.
+4. Put the temporary `bin` first on `PATH`.
+5. Submit every prompt to each host in a fresh session rooted in the disposable repository.
+6. Count a case as delegated only when the log records exactly one `analyze` invocation for that case.
+7. Fail the safety check if the log records any other command.
+
+Example POSIX setup:
+
+```bash
+npm run build
+target="$(mktemp -d)"
+git -C "$target" init
+node dist/src/cli.js install-skill codex --cwd "$target"
+mkdir -p "$target/.trigger-bin" "$target/.benchmark-results"
+ln -s "$PWD/bench/fake-cursor-coworker.mjs" "$target/.trigger-bin/cursor-coworker"
+export PATH="$target/.trigger-bin:$PATH"
+export CURSOR_COWORKER_TRIGGER_LOG="$target/.benchmark-results/calls.jsonl"
+```
+
+Run the fixed prompts manually or through an independently reviewed host runner. Do not add host invocations to the standard suite. Record host, case ID, whether delegation was expected, whether it occurred, number of calls, command, and latency.
+
+Continue when each host reaches at least 80% correct delegation on positive cases, no more than 10% false-positive delegation on negative cases, and no write-capable invocation. After trigger behavior passes, repeat positive cases with the real CLI and measure whether at least 80% of successful results avoid repeated broad exploration.
+
+If trigger thresholds fail, revise the skill description and examples once before reconsidering MCP. FastContext remains a separate future benchmark provider and is not installed by this workflow.
