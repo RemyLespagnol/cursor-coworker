@@ -24,6 +24,23 @@ describe("skill trigger experiment fixtures", () => {
     expect(cases.every(item => item.prompt.length > 20)).toBe(true);
   });
 
+  it("distinguishes partial indexed entry points from complete indexed answers", () => {
+    const byId = new Map(cases.map(item => [item.id, item]));
+    expect(byId.get("positive-codegraph-entrypoints")).toMatchObject({ shouldDelegate: true });
+    expect(byId.get("positive-codegraph-cross-module")).toMatchObject({ shouldDelegate: true });
+    expect(byId.get("negative-codegraph-complete-answer")).toMatchObject({ shouldDelegate: false });
+    expect(byId.get("negative-codegraph-known-symbol")).toMatchObject({ shouldDelegate: false });
+
+    for (const id of [
+      "positive-codegraph-entrypoints",
+      "positive-codegraph-cross-module",
+      "negative-codegraph-complete-answer",
+      "negative-codegraph-known-symbol"
+    ]) {
+      expect(byId.get(id)?.prompt).toContain("CodeGraph");
+    }
+  });
+
   it("records analyze and emits a usable result envelope", () => {
     const root = mkdtempSync(join(tmpdir(), "skill-trigger-"));
     roots.push(root);
