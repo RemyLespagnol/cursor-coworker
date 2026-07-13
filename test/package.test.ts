@@ -28,6 +28,10 @@ it("documents skill installation and the opt-in trigger experiment", async () =>
   expect(readme).toContain("existing `CLAUDE.md`");
   expect(readme).toContain("does not modify");
   expect(benchmark).toContain("cases.skill-trigger.json");
+  expect(benchmark).toContain("## Opt-in Claude Code Agent Skill trigger experiment");
+  expect(benchmark).toContain("invokes real Claude Code");
+  expect(benchmark).not.toContain("Codex or Claude Code");
+  expect(benchmark).not.toContain("each host");
   expect(benchmark).toContain("CURSOR_COWORKER_TRIGGER_LOG");
   expect(benchmark).toContain("80%");
   expect(benchmark).toContain("10%");
