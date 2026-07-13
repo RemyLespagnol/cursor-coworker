@@ -96,6 +96,8 @@ npm run check
 
 Standard tests use a fake executable and make no billable Cursor calls.
 
+Maintainers: see [docs/releasing.md](docs/releasing.md) for the npm bootstrap and recurring release process.
+
 ## Experimental benchmark
 
 The repository includes a local, sequential, read-only harness for comparing Cursor Auto, Cursor Composer 2.5, Claude Sonnet, and Claude Sonnet with native subagents. It requires a clean Git target and writes results under `.benchmark-results/` in the caller's current directory by default; `--output` can select another location.

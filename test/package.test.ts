@@ -92,3 +92,13 @@ it("publishes version tags through npm trusted publishing", async () => {
   expect(workflow).not.toContain("NODE_AUTH_TOKEN");
   expect(workflow).not.toContain("NPM_TOKEN");
 });
+
+it("documents bootstrap and recurring npm releases", async () => {
+  const release = await readFile("docs/releasing.md", "utf8");
+  expect(release).toContain("npm publish --access public");
+  expect(release).toContain("npm publish --access public --provenance");
+  expect(release).toContain("GitHub Actions");
+  expect(release).toContain("Trusted Publisher");
+  expect(release).toContain("npm view cursor-coworker@0.1.0");
+  expect(release).toContain("npx --yes cursor-coworker@0.1.0 doctor");
+});
