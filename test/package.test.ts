@@ -72,7 +72,8 @@ it("verifies and installs the produced package without Cursor authentication", (
     version: "0.1.1",
     skillInstalled: true
   });
-});
+  // ponytail: real npm pack/install subprocess, slower on Windows CI runners
+}, 30_000);
 
 it("requires the release tag to exactly match the package version", () => {
   expect(() => assertReleaseTag("v0.1.0", "0.1.0")).not.toThrow();
