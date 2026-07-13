@@ -8,27 +8,29 @@ Approved design for making the Cursor Coworker skill easier to trigger in Claude
 
 The `cursor-coworker` skill currently excludes questions already answered by indexed repository context such as CodeGraph in its frontmatter description. Claude Code uses that description for implicit skill selection before it loads the workflow body. When CodeGraph is available, the exclusion can therefore hide Cursor Coworker even for broad, cross-cutting analysis where delegation would preserve the parent agent's context.
 
-CodeGraph and Cursor Coworker solve different parts of repository exploration. CodeGraph efficiently locates symbols, files, and call paths. Cursor Coworker delegates bounded synthesis across unfamiliar architecture, multiple modules, component variants, or cross-cutting risks. Availability of the former must not by itself disable the latter.
+Repository indexes and search tools solve a different part of exploration from Cursor Coworker. They efficiently locate symbols, files, and call paths. Cursor Coworker delegates bounded synthesis across unfamiliar architecture, multiple modules, component variants, or cross-cutting risks. Availability of an index must not by itself disable delegation.
 
 ## Decision
 
-Keep CodeGraph and local tools as the preferred path for targeted lookup. Make Cursor Coworker eligible for broad read-only exploration even when indexed context is available.
+Keep indexes, search tools, and local context as the preferred path for targeted lookup. Make Cursor Coworker eligible for broad read-only exploration even when another tool supplies partial repository context.
 
 The skill description will:
 
 - retain the existing positive triggers for unfamiliar architecture, multi-module flow tracing, component comparison, and cross-cutting risk analysis;
 - add an explicit positive trigger for broad synthesis where an index may identify entry points but does not replace delegated analysis;
 - retain negative triggers for a known file or symbol, trivial searches, non-repository research, and tasks whose primary purpose is editing files;
-- stop treating the mere availability of CodeGraph or another repository index as a negative trigger.
+- stop treating the mere availability of another repository tool or preloaded context as a negative trigger.
 
-The workflow body will explain the boundary in operational terms: use indexed or native context for a narrow answer already in hand; use Cursor Coworker when answering still requires broad reading or synthesis. It will not require a CodeGraph attempt before delegation and will not add CodeGraph-specific runtime behavior.
+The workflow body will explain the boundary in operational terms: use existing tool output or native context for a narrow answer already in hand; use Cursor Coworker when answering still requires broad reading or synthesis. It will not require another tool attempt before delegation and will not add tool-specific runtime behavior.
+
+The canonical skill asset remains vendor- and tool-agnostic. It will not name CodeGraph or any competing repository tool in its frontmatter or body. Named tools may appear in external trigger fixtures and benchmark documentation as realistic compatibility scenarios, never as dependencies or selection logic.
 
 ## Resulting selection model
 
 | Question shape | Preferred path |
 | --- | --- |
-| Read a known file or symbol | CodeGraph or native local tool |
-| Perform a trivial text or filename search | CodeGraph or native local tool |
+| Read a known file or symbol | Existing index, search tool, or native local tool |
+| Perform a trivial text or filename search | Existing index, search tool, or native local tool |
 | Explain unfamiliar architecture across modules | Cursor Coworker |
 | Trace a request or data flow across modules | Cursor Coworker |
 | Compare implementations or identify cross-cutting risks | Cursor Coworker |
@@ -78,7 +80,8 @@ Rejected because it would couple the CLI to an optional repository tool and viol
 Update the canonical skill-asset tests to prove that:
 
 - frontmatter positively describes broad synthesis even with indexed entry points;
-- CodeGraph availability is not encoded as an unconditional exclusion;
+- no repository index or search product is named in the canonical skill asset;
+- another tool's availability is not encoded as an unconditional exclusion;
 - targeted known-file, known-symbol, and trivial-search exclusions remain present;
 - the complete read-only delegation, envelope validation, fallback, and safety contract remains unchanged;
 - the skill contains no `cursor-coworker run` invocation and no transcript-retention option.
