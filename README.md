@@ -20,13 +20,13 @@ Preserve the primary coding agent's context by moving context-heavy reading to a
 
 ## Install
 
-Run Cursor Coworker once without installing it:
+Try it once without installing:
 
 ```bash
 npx cursor-coworker doctor
 ```
 
-Or install the CLI globally:
+The skill install and every delegation below assume `cursor-coworker` is on `PATH`, so install it globally before going further:
 
 ```bash
 npm install --global cursor-coworker

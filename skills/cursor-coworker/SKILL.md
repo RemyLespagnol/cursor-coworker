@@ -12,7 +12,8 @@ Use this workflow only for repository exploration. The parent workflow keeps res
 1. Confirm that the question needs broad read-only exploration and matches the description above.
 2. Form one bounded question about the behavior, subsystem, comparison, or flow. Do not delegate the entire parent task.
 3. Reuse the repository already in scope. Do not create a branch, worktree, clone, or temporary repository.
-4. Invoke through the host's normal shell capability:
+4. Requires `cursor-coworker` installed globally (`npm install --global cursor-coworker`) and on `PATH`; a one-off `npx cursor-coworker` invocation does not satisfy this.
+5. Invoke through the host's normal shell capability:
 
    `cursor-coworker analyze --task "<bounded-question>" --cwd "<repository>"`
 
