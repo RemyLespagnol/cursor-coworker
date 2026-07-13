@@ -32,7 +32,7 @@ it("documents skill installation and the opt-in trigger experiment", async () =>
 
 it("declares the first public npm release and publication guard", async () => {
   const pkg = JSON.parse(await readFile("package.json", "utf8"));
-  expect(pkg.version).toBe("0.1.0");
+  expect(pkg.version).toBe("0.1.1");
   expect(pkg.publishConfig).toEqual({ access: "public" });
   expect(pkg.scripts.prepublishOnly).toBe("npm run check && npm run verify:package");
 });
@@ -69,7 +69,7 @@ it("verifies and installs the produced package without Cursor authentication", (
   expect(JSON.parse(result.stdout)).toMatchObject({
     status: "verified",
     package: "cursor-coworker",
-    version: "0.1.0",
+    version: "0.1.1",
     skillInstalled: true
   });
 });

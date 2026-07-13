@@ -1,6 +1,6 @@
 {
   "name": "cursor-coworker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Delegate bounded coding work to an authenticated Cursor Agent CLI",
   "type": "module",
   "bin": {
@@ -25,7 +25,9 @@
     "url": "https://github.com/RemyLespagnol/cursor-coworker/issues"
   },
   "homepage": "https://github.com/RemyLespagnol/cursor-coworker#readme",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
     "test": "vitest run",
