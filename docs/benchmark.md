@@ -126,7 +126,7 @@ Report medians, ranges, failures, missing usage data, and repository limitations
 
 `bench/cases.skill-trigger.json` contains ten prompts that should delegate and ten prompts that should remain local. This experiment invokes real Codex or Claude Code, so it is opt-in and excluded from `npm run check`.
 
-The explored repository must be a real, non-trivial codebase (an empty `git init` has no architecture to explore, so a positive prompt correctly triggers nothing). The fake executable, its log, and the trigger `bin` directory must all live **outside** the explored repository: if the host can see `.trigger-bin` or the log inside the repo it explores, it recognizes the harness and declines to delegate.
+The explored repository must be a disposable clone of the current Cursor Coworker checkout because the fixed cases are grounded in this repository. The fake executable, its log, and the trigger `bin` directory must all live **outside** the explored repository: if the host can see `.trigger-bin` or the log inside the repo it explores, it recognizes the harness and declines to delegate.
 
 Run the host without hooks that paste a complete answer into every prompt. Partial indexed context is part of the experiment: CodeGraph may provide entry points while Cursor Coworker handles the remaining broad synthesis. A complete narrow answer should remain a negative case. Record which indexed context was present so positive and negative classifications remain reproducible.
 
@@ -134,22 +134,29 @@ The fixed indexed cases are self-contained and grounded in the cloned repository
 
 Test activation without a Cursor login or billable call:
 
-1. Build the package and install the skill into a disposable clone of a real repository.
-2. Create a temporary `bin` directory **outside** the explored repository, containing an executable named `cursor-coworker` that points to `bench/fake-cursor-coworker.mjs`.
-3. Set `CURSOR_COWORKER_TRIGGER_LOG` to a private JSONL output path **outside** the explored repository.
-4. Put the temporary `bin` first on `PATH`.
-5. Submit every prompt to each host in a fresh session rooted in the explored repository. Include the fixed partial-index and complete-answer CodeGraph cases without pre-injecting unrelated repository content.
-6. Count a case as delegated only when the log records exactly one `analyze` invocation for that case.
-7. Fail the safety check if the log records any other command.
+1. Build the package and clone the current Cursor Coworker checkout at its exact HEAD into a disposable directory so the fixed cases remain grounded in the cloned repository.
+2. Install the Claude skill in the clone, check that `.claude/CLAUDE.md` is absent, then write the generated `instructions claude` output there.
+3. Create a temporary `bin` directory **outside** the explored repository, containing an executable named `cursor-coworker` that points to `bench/fake-cursor-coworker.mjs`.
+4. Set `CURSOR_COWORKER_TRIGGER_LOG` to a private JSONL output path **outside** the explored repository.
+5. Put the temporary `bin` first on `PATH`.
+6. Submit every fixed prompt to each host in a fresh session rooted in that clone. Include the fixed partial-index and complete-answer CodeGraph cases without pre-injecting unrelated repository content.
+7. Count a case as delegated only when the log records exactly one `analyze` invocation for that case.
+8. Fail the safety check if the log records any other command.
 
 Example POSIX setup:
 
 ```bash
 npm run build
-# explored repo = a real codebase, not an empty git init
-target="$(mktemp -d)/proj"
-git clone --depth 1 https://example.com/some/real-repo.git "$target"
+# Clone the current Cursor Coworker checkout, which matches the fixed cases.
+source="$(git rev-parse --show-toplevel)"
+commit="$(git -C "$source" rev-parse HEAD)"
+target="$(mktemp -d)/cursor-coworker"
+git clone --no-local "$source" "$target"
+git -C "$target" checkout --detach "$commit"
 node dist/src/cli.js install-skill claude --cwd "$target"
+mkdir -p "$target/.claude"
+test ! -e "$target/.claude/CLAUDE.md"
+node dist/src/cli.js instructions claude > "$target/.claude/CLAUDE.md"
 
 # harness lives OUTSIDE the explored repo so the host cannot see it
 harness="$(mktemp -d)"
@@ -158,6 +165,8 @@ ln -s "$PWD/bench/fake-cursor-coworker.mjs" "$harness/bin/cursor-coworker"
 export PATH="$harness/bin:$PATH"
 export CURSOR_COWORKER_TRIGGER_LOG="$harness/calls.jsonl"
 ```
+
+Redirecting into `.claude/CLAUDE.md` is safe here only because the clone is disposable and the command checks that the file is absent first. Normal users must review and manually merge the printed block into an existing `CLAUDE.md` as documented in the README.
 
 Run the fixed prompts manually or through an independently reviewed host runner. Do not add host invocations to the standard suite. Record host, case ID, whether delegation was expected, whether it occurred, number of calls, command, and latency.
 

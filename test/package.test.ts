@@ -34,6 +34,11 @@ it("documents skill installation and the opt-in trigger experiment", async () =>
   expect(benchmark).toContain("partial indexed context");
   expect(benchmark).toContain("complete narrow answer");
   expect(benchmark).toContain("install-skill claude");
+  expect(benchmark).toContain("node dist/src/cli.js instructions claude");
+  expect(benchmark).toContain(".claude/CLAUDE.md");
+  expect(benchmark).toContain("current Cursor Coworker checkout");
+  expect(benchmark).toContain('source="$(git rev-parse --show-toplevel)"');
+  expect(benchmark).not.toContain("https://example.com/some/real-repo.git");
   expect(benchmark).toContain("self-contained");
   expect(benchmark).toContain("grounded in the cloned repository");
   expect(benchmark).not.toContain("Use a vanilla host session");
