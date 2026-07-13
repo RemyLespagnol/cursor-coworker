@@ -1,15 +1,19 @@
 ---
 name: cursor-coworker
-description: Delegate bounded read-only repository exploration to Cursor Coworker. Use for unfamiliar architecture, request or data flow tracing across modules, locating unknown implementations, component comparisons, and cross-cutting risk analysis. Do not use for a known file or symbol, trivial searches, questions already answered by indexed context such as CodeGraph, non-repository research, or tasks whose primary purpose is editing files.
+description: Delegate bounded read-only repository exploration to Cursor Coworker. Use for broad synthesis across unfamiliar architecture, request or data flows, unknown implementations, component comparisons, and cross-cutting risks, including when existing repository tools or context supply only entry points. Do not use for a known file or symbol, trivial searches, a complete narrow answer already present in context, non-repository research, or tasks whose primary purpose is editing files.
 ---
 
 # Cursor Coworker read-only exploration
 
 Use this workflow only for repository exploration. The parent workflow keeps responsibility for planning, edits, verification, Git, concurrency, and review.
 
+## Choose existing context or delegation
+
+Use existing repository tool output or the host's native context directly when it already provides a complete narrow answer about a known file, symbol, caller, or search result. The availability of another tool is not by itself a reason to skip this skill. Delegate when answering still requires broad reading or synthesis across unfamiliar or multiple modules, even if existing context supplied useful entry points.
+
 ## Delegate
 
-1. Confirm that the question needs broad read-only exploration and matches the description above.
+1. Confirm that the question needs broad read-only exploration or synthesis and matches the description above.
 2. Form one bounded question about the behavior, subsystem, comparison, or flow. Do not delegate the entire parent task.
 3. Reuse the repository already in scope. Do not create a branch, worktree, clone, or temporary repository.
 4. Requires `cursor-coworker` installed globally (`npm install --global cursor-coworker`) and on `PATH`; a one-off `npx cursor-coworker` invocation does not satisfy this.

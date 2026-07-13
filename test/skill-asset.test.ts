@@ -4,13 +4,14 @@ import { describe, expect, it } from "vitest";
 const sourcePath = "skills/cursor-coworker/SKILL.md";
 
 describe("cursor-coworker skill asset", () => {
-  it("uses portable Agent Skills frontmatter and explicit activation boundaries", () => {
+  it("uses portable tool-agnostic frontmatter with complementary context boundaries", () => {
     const skill = readFileSync(sourcePath, "utf8");
     expect(skill).toMatch(/^---\nname: cursor-coworker\ndescription: .+\n---\n/);
-    expect(skill).toContain("unfamiliar architecture");
-    expect(skill).toContain("request or data flow");
+    expect(skill).toContain("broad synthesis");
+    expect(skill).toContain("entry points");
+    expect(skill).toContain("complete narrow answer");
     expect(skill).toContain("known file or symbol");
-    expect(skill).toContain("CodeGraph");
+    expect(skill).not.toContain("CodeGraph");
     expect(skill).not.toMatch(/allowed-tools:|context:|agent:|disable-model-invocation:/);
   });
 
