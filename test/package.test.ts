@@ -1,5 +1,7 @@
+import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { expect, it } from "vitest";
+import { validatePackageManifest } from "../scripts/verify-package.mjs";
 
 it("publishes only the built CLI and public documents", async () => {
   const pkg = JSON.parse(await readFile("package.json", "utf8"));
@@ -40,4 +42,33 @@ it("documents one-off, global, and host-skill installation", async () => {
   expect(readme).toContain("npm install --global cursor-coworker");
   expect(readme).toContain("cursor-coworker install-skill codex --scope user");
   expect(readme).toContain("cursor-coworker install-skill claude --scope user");
+});
+
+it("rejects a package manifest without the bundled skill", () => {
+  const pkg = { bin: { "cursor-coworker": "dist/src/cli.js" } };
+  const report = {
+    files: [
+      { path: "dist/src/cli.js" },
+      { path: "README.md" },
+      { path: "LICENSE" },
+      { path: "package.json" }
+    ]
+  };
+  expect(() => validatePackageManifest(pkg, report)).toThrow(
+    "Missing package file: dist/skills/cursor-coworker/SKILL.md"
+  );
+});
+
+it("verifies and installs the produced package without Cursor authentication", () => {
+  const result = spawnSync(process.execPath, ["scripts/verify-package.mjs"], {
+    cwd: process.cwd(),
+    encoding: "utf8"
+  });
+  expect(result.status, result.stderr).toBe(0);
+  expect(JSON.parse(result.stdout)).toMatchObject({
+    status: "verified",
+    package: "cursor-coworker",
+    version: "0.1.0",
+    skillInstalled: true
+  });
 });
