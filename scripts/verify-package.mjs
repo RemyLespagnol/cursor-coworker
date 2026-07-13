@@ -17,7 +17,7 @@ function command(name) {
 }
 
 function run(executable, args, cwd) {
-  const result = spawnSync(executable, args, { cwd, encoding: "utf8" });
+  const result = spawnSync(executable, args, { cwd, encoding: "utf8", shell: executable.endsWith(".cmd") });
   if (result.status !== 0) {
     throw new Error(`${executable} ${args.join(" ")} failed: ${result.stderr || result.stdout}`);
   }
