@@ -18,11 +18,40 @@ Preserve the primary coding agent's context by moving context-heavy reading to a
 - A current `cursor-agent` installation
 - An authenticated Cursor account with headless use permitted by its policy
 
-## Quick start
+## Install
+
+Run Cursor Coworker once without installing it:
 
 ```bash
 npx cursor-coworker doctor
-npx cursor-coworker analyze --task "Explain the authentication flow with file evidence" --cwd "$PWD"
+```
+
+Or install the CLI globally:
+
+```bash
+npm install --global cursor-coworker
+cursor-coworker doctor
+```
+
+The npm package includes both the `cursor-coworker` executable and the companion skill.
+
+## Install the host-agent skill
+
+Install the skill for every project used by Codex or Claude Code:
+
+```bash
+cursor-coworker install-skill codex --scope user
+cursor-coworker install-skill claude --scope user
+```
+
+Omit `--scope user` to install into only the current repository. Existing skill files are never overwritten.
+
+## First delegation
+
+```bash
+cursor-coworker analyze \
+  --task "Explain the authentication flow with file evidence" \
+  --cwd "$PWD"
 ```
 
 ## Commands
@@ -49,21 +78,7 @@ Both delegation commands accept `--cwd`, `--model`, `--timeout`, `--no-sandbox`,
 
 ## Host-agent skill
 
-Install the portable read-only skill into the current repository:
-
-```bash
-cursor-coworker install-skill codex
-cursor-coworker install-skill claude
-```
-
-Project scope is the default and writes only the selected host path under the current repository. Use `--scope user` explicitly to install the same skill for every repository:
-
-```bash
-cursor-coworker install-skill codex --scope user
-cursor-coworker install-skill claude --scope user
-```
-
-The skill delegates bounded, context-heavy repository exploration through `analyze`. It never authorizes writes, retries a failed delegation, retains transcripts, or takes ownership of Git and verification. Existing destinations are never overwritten.
+The skill (installed above) delegates bounded, context-heavy repository exploration through `analyze`. It never authorizes writes, retries a failed delegation, retains transcripts, or takes ownership of Git and verification. Existing destinations are never overwritten.
 
 The shorter generated guidance remains available through:
 

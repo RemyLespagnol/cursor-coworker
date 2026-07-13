@@ -1,19 +1,38 @@
 {
   "name": "cursor-coworker",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Delegate bounded coding work to an authenticated Cursor Agent CLI",
   "type": "module",
-  "bin": { "cursor-coworker": "dist/src/cli.js" },
-  "files": ["dist/src", "dist/bench", "dist/skills", "docs/benchmark.md", "README.md", "LICENSE"],
-  "engines": { "node": ">=22" },
-  "repository": { "type": "git", "url": "git+https://github.com/RemyLespagnol/cursor-coworker.git" },
-  "bugs": { "url": "https://github.com/RemyLespagnol/cursor-coworker/issues" },
+  "bin": {
+    "cursor-coworker": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src",
+    "dist/bench",
+    "dist/skills",
+    "docs/benchmark.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RemyLespagnol/cursor-coworker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/RemyLespagnol/cursor-coworker/issues"
+  },
   "homepage": "https://github.com/RemyLespagnol/cursor-coworker#readme",
+  "publishConfig": { "access": "public" },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run build && npm test",
+    "verify:package": "node scripts/verify-package.mjs",
+    "prepublishOnly": "npm run check && npm run verify:package",
     "prebenchmark:run": "npm run build",
     "benchmark:run": "node dist/bench/run.js",
     "benchmark:validate": "node dist/bench/score.js",

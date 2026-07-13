@@ -26,3 +26,18 @@ it("documents skill installation and the opt-in trigger experiment", async () =>
   expect(benchmark).toContain("80%");
   expect(benchmark).toContain("10%");
 });
+
+it("declares the first public npm release and publication guard", async () => {
+  const pkg = JSON.parse(await readFile("package.json", "utf8"));
+  expect(pkg.version).toBe("0.1.0");
+  expect(pkg.publishConfig).toEqual({ access: "public" });
+  expect(pkg.scripts.prepublishOnly).toBe("npm run check && npm run verify:package");
+});
+
+it("documents one-off, global, and host-skill installation", async () => {
+  const readme = await readFile("README.md", "utf8");
+  expect(readme).toContain("npx cursor-coworker doctor");
+  expect(readme).toContain("npm install --global cursor-coworker");
+  expect(readme).toContain("cursor-coworker install-skill codex --scope user");
+  expect(readme).toContain("cursor-coworker install-skill claude --scope user");
+});
