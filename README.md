@@ -81,6 +81,24 @@ npm run benchmark:run -- \
 
 Claude receives only read-only tools inside a fresh disposable clone. The subagent variant additionally receives the built-in `Agent` tool. See [docs/benchmark.md](docs/benchmark.md) for the protocol, options, safety constraints, and interpretation guidance.
 
+### Comparison report
+
+`benchmark:report` combines one or more existing result directories with a blind-score file, and optionally a private Cursor usage CSV export, into machine-readable JSON on stdout plus an optional Markdown table:
+
+```bash
+npm run benchmark:report -- \
+  --results .benchmark-results/cursor-run \
+  --results .benchmark-results/claude-run \
+  --scores /private/path/blind-scores.json \
+  --cursor-csv /private/path/team-usage-events.csv \
+  --cursor-start 2026-07-10T22:10:00Z \
+  --cursor-end 2026-07-10T23:00:00Z \
+  --json .benchmark-results/comparison.json \
+  --markdown .benchmark-results/comparison.md
+```
+
+Scoring stays human and blind. Cursor CSV attribution is deterministic only after the event count and chronological model sequence match the loaded Cursor runs exactly; a mismatch is a hard error. The CSV and raw responses are never copied into the report — only aggregates are written. `estimatedUsageValueUsd` reconstructs Cursor list-price or Claude `total_cost_usd` value and is not necessarily an invoice charge; `additionalBilledCostUsd` is the separately billed amount (`0` for `Included` Cursor events). Keep any generated private reports under `.benchmark-results/`.
+
 ### Initial results
 
 An initial experiment used four generic repository-analysis cases with three repetitions on one private TypeScript service. Scores combine factual quality and evidence quality on a 0–5 rubric. The review was consistent but not independently blinded, so treat these numbers as directional rather than universal.

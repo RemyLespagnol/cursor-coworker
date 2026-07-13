@@ -39,6 +39,65 @@ Claude's JSON output supplies token and cost fields directly when available. The
 
 Each case file is a non-empty JSON array of `{ "id", "category", "task" }` objects. All cases run through the read-only `analyze` command. The final `report.json` contains execution status, latency, evidence count, usage state, and the path to every raw result. Factual and evidence scoring remains a blind manual step.
 
+## Comparison report
+
+`benchmark:report` loads one or more existing result directories, attaches blind scores, optionally enriches Cursor runs from a private usage CSV, then writes a machine-readable comparison to stdout and optional files. It never re-invokes a model and never writes into the input result directories.
+
+```bash
+npm run benchmark:report -- \
+  --results .benchmark-results/cursor-run \
+  --results .benchmark-results/claude-run \
+  --scores /private/path/blind-scores.json \
+  --cursor-csv /private/path/team-usage-events.csv \
+  --cursor-start 2026-07-10T22:10:00Z \
+  --cursor-end 2026-07-10T23:00:00Z \
+  --cursor-exclude-id cloud-agent-id-to-skip \
+  --json .benchmark-results/comparison.json \
+  --markdown .benchmark-results/comparison.md
+```
+
+Options:
+
+```text
+--results PATH          result directory (repeat for each provider; at least one required)
+--scores PATH           blind-score JSON (required)
+--cursor-csv PATH       Cursor usage-events CSV export
+--cursor-start ISO      inclusive start of the attribution window (requires --cursor-csv)
+--cursor-end ISO        exclusive end of the attribution window (requires --cursor-csv)
+--cursor-exclude-id ID  Cloud Agent ID to exclude (repeat as needed; requires --cursor-csv)
+--json PATH             write the comparison JSON to a file
+--markdown PATH         write the comparison Markdown table to a file
+```
+
+### Score schema
+
+Scoring stays manual and blind; the command validates and aggregates scores but never invents them. The `--scores` file uses this exact public shape:
+
+```json
+{
+  "schemaVersion": 1,
+  "scores": [
+    {
+      "provider": "cursor-auto",
+      "caseId": "architecture",
+      "repetition": 1,
+      "factualScore": 5,
+      "evidenceScore": 4,
+      "usable": true,
+      "criticalError": false
+    }
+  ]
+}
+```
+
+`factualScore` and `evidenceScore` are integers from 0 through 5; `usable` and `criticalError` are booleans. Scorer identities are absent from the file. Blind the filenames and model labels before review, and give every input result directory a unique provider/case/repetition identity — duplicate run keys are rejected.
+
+### Cursor usage attribution
+
+Cursor event matching uses the explicit half-open `[start, end)` window and the exact chronological model sequence of the loaded Cursor runs. Auxiliary events sharing the window must be excluded by Cloud Agent ID with repeated `--cursor-exclude-id` flags. If the surviving event count or model order does not match the Cursor runs, the command fails rather than guessing.
+
+Cursor list-price value is an estimate reported as `estimatedUsageValueUsd`; a `Cost` cell of `Included` maps to zero `additionalBilledCostUsd`, while a numeric cost is recorded as charged. Claude `total_cost_usd` is likewise recorded as `estimatedUsageValueUsd`, not assumed to be an invoice charge. Subagent token coverage can remain incomplete. The report JSON and Markdown contain only aggregates — never raw responses, user names, session IDs, or CSV rows.
+
 ## Paths
 
 Run every case with the primary agent alone, a native subagent, Cursor Auto, and Cursor Composer 2.5. Use the same repository commit, task text, allowed tools, and time limit. Repeat each path at least three times.

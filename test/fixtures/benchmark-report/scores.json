@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "scores": [
+    {
+      "provider": "cursor-auto",
+      "caseId": "architecture",
+      "repetition": 1,
+      "factualScore": 5,
+      "evidenceScore": 4,
+      "usable": true,
+      "criticalError": false
+    },
+    {
+      "provider": "claude-sonnet",
+      "caseId": "architecture",
+      "repetition": 1,
+      "factualScore": 4,
+      "evidenceScore": 3,
+      "usable": true,
+      "criticalError": false
+    }
+  ]
+}

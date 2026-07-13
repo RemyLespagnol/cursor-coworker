@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "target": { "path": "/fixture/repo", "commit": "fixturecommit", "unchanged": true },
+  "configuration": { "models": ["auto"], "repetitions": 1, "cases": ["architecture"] },
+  "runs": [
+    {
+      "caseId": "architecture",
+      "category": "analysis",
+      "provider": "cursor-auto",
+      "model": "auto",
+      "repetition": 1,
+      "status": "completed",
+      "taskStatus": "completed",
+      "latencyMs": 1000,
+      "evidenceCount": 1,
+      "usageState": "unknown",
+      "output": "architecture-auto-1.json"
+    }
+  ]
+}

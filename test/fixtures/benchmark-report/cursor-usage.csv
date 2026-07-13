@@ -1,0 +1,4 @@
+Date,User,Cloud Agent ID,Automation ID,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Cost
+2026-07-10T22:10:00Z,"Doe, Jane",cursor-auto-event,auto-1,agent,auto,false,3000,1000,2000,500,3500,Included
+2026-07-10T22:20:00Z,"Smith, ""Bob""",exclude-me,aux-1,agent,auto,false,900,300,100,50,450,Included
+2026-07-10T22:30:00Z,"Roe, Amy",cursor-composer-event,composer-1,agent,composer-2.5,false,900,800,100,200,1100,Included

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "target": { "path": "/fixture/repo", "commit": "fixturecommit", "unchanged": true },
+  "configuration": { "models": ["sonnet"], "providers": ["claude-sonnet"], "repetitions": 1, "cases": ["architecture"] },
+  "runs": [
+    {
+      "caseId": "architecture",
+      "category": "analysis",
+      "provider": "claude-sonnet",
+      "model": "sonnet",
+      "repetition": 1,
+      "status": "completed",
+      "taskStatus": "completed",
+      "latencyMs": 2000,
+      "evidenceCount": 1,
+      "usageState": "observed",
+      "output": "architecture-claude-sonnet-1.json"
+    }
+  ]
+}
