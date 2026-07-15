@@ -1,6 +1,6 @@
 {
   "name": "cursor-coworker",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Delegate bounded coding work to an authenticated Cursor Agent CLI",
   "type": "module",
   "bin": {
