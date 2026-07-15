@@ -46,6 +46,14 @@ cursor-coworker install-skill claude --scope user
 
 Omit `--scope user` to install into only the current repository. Existing skill files are never overwritten.
 
+For more reliable implicit activation in Claude Code, print the validated routing block and add it to your existing `CLAUDE.md`:
+
+```bash
+cursor-coworker instructions claude
+```
+
+Review and merge the printed block manually. The command only prints instructions; it does not modify or overwrite `CLAUDE.md`.
+
 ## First delegation
 
 ```bash

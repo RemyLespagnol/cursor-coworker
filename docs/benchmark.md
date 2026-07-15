@@ -122,32 +122,41 @@ Continue only with at least 30% lower primary-agent context, at least 80% direct
 
 Report medians, ranges, failures, missing usage data, and repository limitations. Do not claim cost savings from token prices alone.
 
-## Opt-in Agent Skill trigger experiment
+## Opt-in Claude Code Agent Skill trigger experiment
 
-`bench/cases.skill-trigger.json` contains ten prompts that should delegate and ten prompts that should remain local. This experiment invokes real Codex or Claude Code, so it is opt-in and excluded from `npm run check`.
+`bench/cases.skill-trigger.json` contains ten prompts that should delegate and ten prompts that should remain local. This experiment invokes real Claude Code, so it is opt-in and excluded from `npm run check`.
 
-The explored repository must be a real, non-trivial codebase (an empty `git init` has no architecture to explore, so a positive prompt correctly triggers nothing). The fake executable, its log, and the trigger `bin` directory must all live **outside** the explored repository: if the host can see `.trigger-bin` or the log inside the repo it explores, it recognizes the harness and declines to delegate.
+The explored repository must be a disposable clone of the current Cursor Coworker checkout because the fixed cases are grounded in this repository. The fake executable, its log, and the trigger `bin` directory must all live **outside** the explored repository: if Claude Code can see `.trigger-bin` or the log inside the repo it explores, it recognizes the harness and declines to delegate.
 
-The host must run **without** any layer that pre-injects repository context (for example a CodeGraph or orchestration hook that pastes the repo structure into every prompt). The skill is explicitly told not to delegate when indexed context such as CodeGraph already answers the question, so such a layer suppresses the trigger by design and makes every positive case a false miss. Use a vanilla host session.
+Run Claude Code without hooks that paste a complete answer into every prompt. Partial indexed context is part of the experiment: CodeGraph may provide entry points while Cursor Coworker handles the remaining broad synthesis. A complete narrow answer should remain a negative case. Record which indexed context was present so positive and negative classifications remain reproducible.
+
+The fixed indexed cases are self-contained and grounded in the cloned repository: each prompt names the real paths and symbols needed to reproduce its classification in a fresh session. Use the labels `partial indexed context` and `complete narrow answer` when recording these cases.
 
 Test activation without a Cursor login or billable call:
 
-1. Build the package and install the skill into a disposable clone of a real repository.
-2. Create a temporary `bin` directory **outside** the explored repository, containing an executable named `cursor-coworker` that points to `bench/fake-cursor-coworker.mjs`.
-3. Set `CURSOR_COWORKER_TRIGGER_LOG` to a private JSONL output path **outside** the explored repository.
-4. Put the temporary `bin` first on `PATH`.
-5. Submit every prompt to each host in a fresh, context-injection-free session rooted in the explored repository.
-6. Count a case as delegated only when the log records exactly one `analyze` invocation for that case.
-7. Fail the safety check if the log records any other command.
+1. Build the package and clone the current Cursor Coworker checkout at its exact HEAD into a disposable directory so the fixed cases remain grounded in the cloned repository.
+2. Install the Claude skill in the clone, check that `.claude/CLAUDE.md` is absent, then write the generated `instructions claude` output there.
+3. Create a temporary `bin` directory **outside** the explored repository, containing an executable named `cursor-coworker` that points to `bench/fake-cursor-coworker.mjs`.
+4. Set `CURSOR_COWORKER_TRIGGER_LOG` to a private JSONL output path **outside** the explored repository.
+5. Put the temporary `bin` first on `PATH`.
+6. Submit every fixed prompt to Claude Code in a fresh session rooted in that clone. Include the fixed partial-index and complete-answer CodeGraph cases without pre-injecting unrelated repository content.
+7. Count a case as delegated only when the log records exactly one `analyze` invocation for that case.
+8. Fail the safety check if the log records any other command.
 
 Example POSIX setup:
 
 ```bash
 npm run build
-# explored repo = a real codebase, not an empty git init
-target="$(mktemp -d)/proj"
-git clone --depth 1 https://example.com/some/real-repo.git "$target"
-node dist/src/cli.js install-skill codex --cwd "$target"
+# Clone the current Cursor Coworker checkout, which matches the fixed cases.
+source="$(git rev-parse --show-toplevel)"
+commit="$(git -C "$source" rev-parse HEAD)"
+target="$(mktemp -d)/cursor-coworker"
+git clone --no-local "$source" "$target"
+git -C "$target" checkout --detach "$commit"
+node dist/src/cli.js install-skill claude --cwd "$target"
+mkdir -p "$target/.claude"
+test ! -e "$target/.claude/CLAUDE.md"
+node dist/src/cli.js instructions claude > "$target/.claude/CLAUDE.md"
 
 # harness lives OUTSIDE the explored repo so the host cannot see it
 harness="$(mktemp -d)"
@@ -157,8 +166,10 @@ export PATH="$harness/bin:$PATH"
 export CURSOR_COWORKER_TRIGGER_LOG="$harness/calls.jsonl"
 ```
 
-Run the fixed prompts manually or through an independently reviewed host runner. Do not add host invocations to the standard suite. Record host, case ID, whether delegation was expected, whether it occurred, number of calls, command, and latency.
+Redirecting into `.claude/CLAUDE.md` is safe here only because the clone is disposable and the command checks that the file is absent first. Normal users must review and manually merge the printed block into an existing `CLAUDE.md` as documented in the README.
 
-Continue when each host reaches at least 80% correct delegation on positive cases, no more than 10% false-positive delegation on negative cases, and no write-capable invocation. After trigger behavior passes, repeat positive cases with the real CLI and measure whether at least 80% of successful results avoid repeated broad exploration.
+Run the fixed prompts manually or through an independently reviewed Claude Code runner. Do not add Claude Code invocations to the standard suite. Record the Claude Code version, case ID, whether delegation was expected, whether it occurred, number of calls, command, and latency.
+
+Continue when Claude Code reaches at least 80% correct delegation on positive cases, no more than 10% false-positive delegation on negative cases, and no write-capable invocation. After trigger behavior passes, repeat positive cases with the real CLI and measure whether at least 80% of successful results avoid repeated broad exploration.
 
 If trigger thresholds fail, revise the skill description and examples once before reconsidering MCP. FastContext remains a separate future benchmark provider and is not installed by this workflow.

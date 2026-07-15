@@ -24,6 +24,42 @@ describe("skill trigger experiment fixtures", () => {
     expect(cases.every(item => item.prompt.length > 20)).toBe(true);
   });
 
+  it("distinguishes partial indexed entry points from complete indexed answers", () => {
+    const byId = new Map(cases.map(item => [item.id, item]));
+    expect(byId.get("positive-codegraph-entrypoints")).toMatchObject({ shouldDelegate: true });
+    expect(byId.get("positive-codegraph-cross-module")).toMatchObject({ shouldDelegate: true });
+    expect(byId.get("negative-codegraph-complete-answer")).toMatchObject({ shouldDelegate: false });
+    expect(byId.get("negative-codegraph-known-symbol")).toMatchObject({ shouldDelegate: false });
+
+    for (const id of [
+      "positive-codegraph-entrypoints",
+      "positive-codegraph-cross-module",
+      "negative-codegraph-complete-answer",
+      "negative-codegraph-known-symbol"
+    ]) {
+      expect(byId.get(id)?.prompt).toContain("CodeGraph");
+    }
+
+    expect(byId.get("positive-codegraph-entrypoints")?.prompt).toContain("main in src/cli.ts");
+    expect(byId.get("positive-codegraph-entrypoints")?.prompt).toContain("delegate in src/commands/delegate.ts");
+    expect(byId.get("positive-codegraph-cross-module")?.prompt).toContain("runProcess in src/execution/process.ts");
+    expect(byId.get("positive-codegraph-cross-module")?.prompt).toContain("normalizeResult in src/execution/normalize.ts");
+    expect(byId.get("negative-codegraph-complete-answer")?.prompt).toContain("main calls delegate for analyze and run");
+    expect(byId.get("negative-codegraph-known-symbol")?.prompt).toContain("generateInstructions");
+    expect(byId.get("negative-codegraph-known-symbol")?.prompt).toContain("caller main");
+    expect(cases.every(item => !item.prompt.includes("provided above"))).toBe(true);
+
+    for (const [path, declaration] of [
+      ["src/cli.ts", "export async function main"],
+      ["src/commands/delegate.ts", "export async function delegate"],
+      ["src/execution/process.ts", "export function runProcess"],
+      ["src/execution/normalize.ts", "export function normalizeResult"],
+      ["src/commands/instructions.ts", "export function generateInstructions"]
+    ]) {
+      expect(readFileSync(path, "utf8")).toContain(declaration);
+    }
+  });
+
   it("records analyze and emits a usable result envelope", () => {
     const root = mkdtempSync(join(tmpdir(), "skill-trigger-"));
     roots.push(root);

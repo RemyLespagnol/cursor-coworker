@@ -24,10 +24,29 @@ it("documents skill installation and the opt-in trigger experiment", async () =>
   expect(readme).toContain("install-skill codex");
   expect(readme).toContain("install-skill claude");
   expect(readme).toContain("--scope user");
+  expect(readme).toContain("cursor-coworker instructions claude");
+  expect(readme).toContain("existing `CLAUDE.md`");
+  expect(readme).toContain("does not modify");
   expect(benchmark).toContain("cases.skill-trigger.json");
+  expect(benchmark).toContain("## Opt-in Claude Code Agent Skill trigger experiment");
+  expect(benchmark).toContain("invokes real Claude Code");
+  expect(benchmark).not.toContain("Codex or Claude Code");
+  expect(benchmark).not.toContain("each host");
   expect(benchmark).toContain("CURSOR_COWORKER_TRIGGER_LOG");
   expect(benchmark).toContain("80%");
   expect(benchmark).toContain("10%");
+  expect(benchmark).toContain("partial indexed context");
+  expect(benchmark).toContain("complete narrow answer");
+  expect(benchmark).toContain("install-skill claude");
+  expect(benchmark).toContain("node dist/src/cli.js instructions claude");
+  expect(benchmark).toContain(".claude/CLAUDE.md");
+  expect(benchmark).toContain("current Cursor Coworker checkout");
+  expect(benchmark).toContain('source="$(git rev-parse --show-toplevel)"');
+  expect(benchmark).not.toContain("https://example.com/some/real-repo.git");
+  expect(benchmark).toContain("self-contained");
+  expect(benchmark).toContain("grounded in the cloned repository");
+  expect(benchmark).not.toContain("Use a vanilla host session");
+  expect(benchmark).not.toContain("suppresses the trigger by design");
 });
 
 it("declares the first public npm release and publication guard", async () => {

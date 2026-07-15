@@ -14,7 +14,7 @@ it("runs when the executable is reached through a symlink", () => {
     symlinkSync(cli, link);
     const result = spawnSync(process.execPath, [link, "instructions", "claude"], { encoding: "utf8" });
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout).toContain("cursor-coworker analyze");
+    expect(result.stdout).toContain("invoke /cursor-coworker exactly once");
   } finally {
     rmSync(temporary, { recursive: true, force: true });
   }
@@ -25,7 +25,22 @@ it("prints generated Claude instructions", async () => {
   const stderr = vi.fn();
   const code = await main(["instructions", "claude"], { stdout, stderr });
   expect(code).toBe(0);
-  expect(stdout.mock.calls[0]?.[0]).toContain("cursor-coworker analyze");
+  const text = stdout.mock.calls[0]?.[0] ?? "";
+  expect(text).toBe(
+    "## Cursor Coworker delegation\n\n" +
+    "For every bounded read-only repository question that requires broad synthesis, you must invoke /cursor-coworker exactly once before using direct repository exploration tools. Treat architecture explanation, tracing behavior across two or more modules, comparing components, locating an unknown implementation, and cross-cutting risk analysis as broad synthesis, even when existing repository context provides entry-point files or symbols. Keep a known-file or known-symbol lookup, trivial search, complete narrow answer already in context, editing task, or non-repository question local. Never invoke Cursor Coworker for edits.\n\n" +
+    "Consume the compact JSON result; do not request the raw Cursor transcript. The current workflow remains responsible for Git isolation, concurrency, verification, and review.\n"
+  );
+  expect(stderr).not.toHaveBeenCalled();
+});
+
+it("keeps generated Codex instructions on the direct CLI flow", async () => {
+  const stdout = vi.fn();
+  const stderr = vi.fn();
+  expect(await main(["instructions", "codex"], { stdout, stderr })).toBe(0);
+  const text = stdout.mock.calls[0]?.[0] ?? "";
+  expect(text).toContain('cursor-coworker analyze --task "<bounded question>"');
+  expect(text).not.toContain("/cursor-coworker");
   expect(stderr).not.toHaveBeenCalled();
 });
 

@@ -3,6 +3,7 @@ dist/
 coverage/
 .benchmark-results/
 .cursor-coworker/
+.worktrees/
 *.log
 
 tokentelemetry
